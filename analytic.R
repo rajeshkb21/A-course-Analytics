@@ -1,0 +1,1 @@
+data = read.csv("gender_submission",header = TRUE)
