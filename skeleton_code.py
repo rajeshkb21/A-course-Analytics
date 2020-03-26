@@ -15,10 +15,10 @@ def example_neural_network(input_shape):
 
     # model layer structure
     model = tf.keras.Sequential([
-        tf.keras.layers.Flatten(input_shape=input_shape),
-        tf.keras.layers.Dense(d1, activation=tf.nn.relu),
-        tf.keras.layers.Dense(d1, activation=tf.nn.relu),
-        tf.keras.layers.Dense(10, activation=tf.nn.softmax)
+        tf.keras.layers.Flatten(input_shape=input_shape), # 1 X n
+        tf.keras.layers.Dense(d1, activation=tf.nn.relu), # 1 x d1  relu = max(0, elem)
+        tf.keras.layers.Dense(d2, activation=tf.nn.relu), # 1 X d2
+        tf.keras.layers.Dense(10, activation=tf.nn.softmax) # 1 x 10
     ])
 
     # define model optimization function
@@ -39,13 +39,6 @@ def example_neural_network(input_shape):
 
 #TODO
 def actual_NN_model():
-    return
-
-
-#TODO 
-# Use pandas functions to preprocess the data
-def preprocess_data(datapath):
-    data = pd.csvread(datapath)
     return
 
 
