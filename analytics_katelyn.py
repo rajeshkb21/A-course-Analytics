@@ -134,18 +134,21 @@ if __name__ == '__main__':
     
     y = train_data["Survived"]
     
-    features = ["Pclass", "Sex", "SibSp", "Parch", "Fare", "Embarked", "Age", "Ticket", "Cabin"]
+    features = ["Sex", "Fare", "Age"]
     X = pd.get_dummies(train_data[features])
     X_test = pd.get_dummies(test_data[features])
+    #print(test_data)
+    #y_test = test_data["Survived"]
     
     model = RandomForestClassifier(n_estimators=100, max_depth=20, random_state=1)
     model.fit(X, y)
     predictions = model.predict(X_test)
+    print(model.feature_importances_)
     
     output = pd.DataFrame({'PassengerId': test_data.PassengerId, 'Survived': predictions})
     output.to_csv('my_submission.csv', index=False)
-    score = model.score(X,y)
-    print("Accuracy = ", score)
+    #score = model.score(X,y)    # test score, since gt not provided for test data
+    #print("Accuracy = ", score)
     
 
 
