@@ -7,7 +7,7 @@ def preprocess_data(train_data_path, test_data_path):
     
     # extract data
     train_data = pd.read_csv(train_data_path)
-    train_labels = train_data['Survived'].values
+    train_labels = train_data['Survived']
     test_data = pd.read_csv(test_data_path)
 
     # If data is missing replace with unknown flag -1 or 'UNK'
@@ -18,8 +18,9 @@ def preprocess_data(train_data_path, test_data_path):
 
     # define mappings of categorical features to numerical values
     mf_mapping = {-1: -1, 'male': 0, 'female': 1}
-    embarked_mapping = {-1:-1, 'S': 0, 'C': 1, 'Q': 2}
+    embarked_mapping = {-1:-0, 'S': 0, 'C': 1, 'Q': 2}
     cabin_mapping = create_cabin_mapping(train_data['Cabin'])
+
 
     # apply the mappings to their respective columns
     train_data['Sex'] = train_data['Sex'].map(mf_mapping)
@@ -30,14 +31,41 @@ def preprocess_data(train_data_path, test_data_path):
     test_data['Embarked'] = test_data['Embarked'].map(embarked_mapping)
     train_data['Ticket'] = train_data['Ticket'].apply(ticket_mapping_function)
     test_data['Ticket'] = test_data['Ticket'].apply(ticket_mapping_function)
-    
+    train_data['PartySize'] = train_data['SibSp'] + train_data['Parch']
+    test_data['PartySize'] = test_data['SibSp'] + test_data['Parch']
+
+    # Compute average age value
+    male_mean_age = train_data['Age'].loc[(train_data['Sex']==0) & (train_data['Age'] >=0)].mean()
+    female_mean_age = train_data['Age'].loc[(train_data['Sex']==1) & (train_data['Age'] >=0)].mean()
+
+    print(male_mean_age)
+    print(female_mean_age)
+
+    train_data['Age'].loc[(train_data['Sex']==0) & (train_data['Age']<0)] = male_mean_age
+    train_data['Age'].loc[(train_data['Sex']==1) & (train_data['Age']<0)] = female_mean_age
+    test_data['Age'].loc[(test_data['Sex']==0) & (test_data['Age']<0)] = male_mean_age
+    test_data['Age'].loc[(test_data['Sex']==1) & (test_data['Age']<0)] = female_mean_age
+    test_data['Fare'].iloc[152] = 0
+
+    # discretize columns with continuous data
+    fare_bins = [0, 10, 20, 30, 50, 60, 70, 80, 90, 100, 150, 200, np.inf]
+    train_data['Fare'] = pd.cut(train_data['Fare'], fare_bins, right=False, labels=False)
+    test_data['Fare'] = pd.cut(test_data['Fare'], fare_bins, right=False, labels=False)
+    age_bins  = [0, 10, 20, 30, 40, 50, 60, 70, 80, np.inf]
+    train_data['Age'] = pd.cut(train_data['Age'], age_bins, right=False, labels=False)
+    test_data['Age'] = pd.cut(test_data['Age'], age_bins, right=False, labels=False)
+
     # drop uninformative columns
-    train_data.drop(columns=['PassengerId', 'Name'])
-    test_data.drop(columns=['PassengerId', 'Name'])
-    
+    train_data = train_data.drop(columns=['PassengerId','Survived','Name','SibSp','Parch'])
+    test_ids = test_data['PassengerId']
+    test_data = test_data.drop(columns=['PassengerId','Name','SibSp','Parch'])
+
     # Save dataframes as pickle files
-    train_data.to_pickle("train_data.pickle")
-    test_data.to_pickle("test_data.pickle")
+    train_data.to_pickle("data/train_data_disc.pickle")
+    test_data.to_pickle("data/test_data_disc.pickle")
+    train_labels.to_pickle("data/train_labels.pickle")
+    test_ids.to_pickle("data/test_ids.pickle")
+    train_data.to_csv("data/disc_train_data.csv")
     return
 
 
@@ -75,6 +103,6 @@ def cabin_mapping_function(val, cabin_mapping):
 
 
 if __name__ == '__main__':
-    TRAIN_DATA_PATH = 'train.csv'
-    TEST_DATA_PATH = 'test.csv'
+    TRAIN_DATA_PATH = 'data/train.csv'
+    TEST_DATA_PATH = 'data/test.csv'
     preprocess_data(TRAIN_DATA_PATH, TEST_DATA_PATH)

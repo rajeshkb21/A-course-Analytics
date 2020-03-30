@@ -37,11 +37,6 @@ def example_neural_network(input_shape):
     return model, history
 
 
-#TODO
-def actual_NN_model():
-    return
-
-
 # PCA is a dimensionality reduction technique. 
 # Given input parameter 'k', PCA finds the top k directions of the feature space on which the data 
 #   exhibits the greatest variance.
@@ -58,12 +53,3 @@ def perform_PCA(X, k):
     W = eigvecs[:,0:k]
     X_transf = np.matmul(X,W)
     return X_transf, eigvals
-
-
-# TODO
-# For all other models, take a look at the sklearn docs
-
-
-# TODO
-def generate_submission_form():
-    return
